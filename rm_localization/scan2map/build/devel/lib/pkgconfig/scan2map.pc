@@ -1,8 +1,0 @@
-prefix=/home/ythare/ws_livox/src/scan2map/build/devel
-
-Name: scan2map
-Description: Description of scan2map
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
