@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+ 
+<launch>
+    <!-- run pointcloud_to_laserscan node -->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+ 
+        <remap from="cloud_in" to="/livox/lidar"/>  
+        <!-- <remap from="cloud_in" to="/icp_node/registered_cloud"/>  -->
+        <rosparam>
+            # target_frame: rslidar # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: -0.05
+            max_height: 0.22
+ 
+            angle_min: -3.1415926 # -M_PI
+            angle_max: 3.1415926 # M_PI
+            angle_increment: 0.003 # 0.17degree
+            scan_time: 0.1
+            range_min: 0.2
+            range_max: 100
+            use_inf: true
+            inf_epsilon: 1.0
+ 
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+ 
+    </node>
+    <!-- 角度滤波 -->
+    <include file="$(find laser_filters)/launch/anglarBounds.launch" />
+    <!-- 启动串口 -->
+    <!-- <include file= "$(find serialport)/launch/robot_start.launch" >  -->
+
+    <!-- tf变换 -->
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom"
+    args="0.0 0.0 0.0 0 0.0 0.0 /map /odom 100" />
+    <!-- 雷达倒置tf变换 -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
+    args="0.0 0.0 0.5 0 0.0 3.14 /base_footprint /livox_frame 100" /> -->
+    <!-- 雷达正放 -->
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
+    args="0.0 0.0 0.5 0 0.0 0.0 /base_footprint /livox_frame 100" />
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="odom_base_footprint_broadcaster"  args="0 0 0 0 0.0 0.0 /odom /base_footprint 100" /> -->
+
+
+  
+</launch>
