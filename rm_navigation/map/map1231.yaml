@@ -1,0 +1,7 @@
+image: /home/ares_yt/ws_livox/src/rm_navigation/map/map1231.pgm
+resolution: 0.050000
+origin: [-6.988926, -2.464780, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+
