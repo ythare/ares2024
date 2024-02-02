@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<!-- xacro -->
+<robot name="my_imu" xmlns:xacro="http://wiki.ros.org/xacro">
+ 
+    <xacro:property name="imu_length" value="0.01" /> 
+    <xacro:property name="imu_width" value="0.025" /> 
+    <xacro:property name="imu_height" value="0.025" /> 
+    <xacro:property name="imu_x" value="0.08" /> 
+    <xacro:property name="imu_y" value="0.0" /> 
+    <xacro:property name="imu_z" value="${base_link_length / 2 + imu_height / 2}" /> 
+
+    <xacro:property name="imu_m" value="0.01" /> 
+
+  
+    <link name="imu_link">
+        <visual>
+            <geometry>
+                <box size="${imu_length} ${imu_width} ${imu_height}" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <material name="black" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${imu_length} ${imu_width} ${imu_height}" />
+            </geometry>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        </collision>
+        <xacro:Box_inertial_matrix m="${imu_m}" l="${imu_length}" w="${imu_width}" h="${imu_height}" />
+    </link>
+
+    <joint name="imu2base_link" type="fixed">
+        <parent link="base_link" />
+        <child link="imu_link" />
+        <origin xyz="${imu_x} ${imu_y} ${imu_z}" />
+    </joint>
+    <gazebo reference="imu_link">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+</robot>
