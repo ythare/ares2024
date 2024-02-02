@@ -1,0 +1,12 @@
+<launch>
+    <!-- 使用bag的时间戳 -->
+    <param name="use_sim_time" value="false" />
+    <node name="scan2map"
+        pkg="scan2map" type="scan_to_map_location_node" output="screen"  respawn="true" >
+        <rosparam file="$(find scan2map)/param/icp_params.yaml" command="load"/>
+    </node>
+
+    <!-- <include file="$(find auto_nav)/launch/amcl.launch"/> -->
+    <include file="$(find scan2map)/launch/ekf_localization_.launch"/>
+
+</launch>
