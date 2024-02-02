@@ -1,0 +1,8 @@
+prefix=/home/ares_yt/ws_livox/src/serialport/build/devel
+
+Name: serialport
+Description: Description of serialport
+Version: 0.0.0
+Cflags: -I/home/ares_yt/ws_livox/src/serialport/build/devel/include
+Libs: -L${prefix}/lib -lserialport
+Requires: roscpp rospy serial std_msgs geometry_msgs nav_msgs sensor_msgs tf tf2_geometry_msgs message_runtime actionlib_msgs actionlib
