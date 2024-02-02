@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="mode" default="0" />   <!-- 0->nav | 1->mapping -->
+
+    <arg name="rviz_open" default="$(arg mode)" />
+    <arg name="pcd_save_enable" default="$(arg mode)" />
+    <!-- <arg name="map" default="rmuc_map_draw.yaml" /> -->
+    <arg name="map" default="RMUC3.yaml" />
+    <!-- icp_localization -->
+    <arg name="pcd_filename" default="RMUC3.pcd" /> 
+	<arg name="pcd_filepath" default="$(find rm_bringup)/PCD/$(arg pcd_filename)" /> 
+
+        <!-- ***************************simulation env******************** -->
+    <include file="$(find ares_simulation)/launch/simu_ares.launch" >
+        <arg name="key_control" value="$(arg mode)" />
+    </include>
+
+        <!-- ***************************fast_lio for Odometry******************** -->
+    <include file="$(find fast_lio)/launch/mapping_avia.launch" >
+        <arg name="rviz" value="$(arg rviz_open)" />
+        <arg name="pcd_save_enable" value="true" />
+    </include>
+
+    <group unless="$(arg mode)">  
+
+         <!-- ***************************Ground segmentation ***************************-->
+    <node name="ground_segmentation" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node" output="screen">
+        <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
+        <param name="input_topic" value="/livox/lidar/pointcloud" />
+        <param name="ground_output_topic" value="segmentation/ground" />
+        <param name="obstacle_output_topic" value="segmentation/obstacle" />
+    </node>
+
+
+        <!-- ****************run pointcloud_to_laserscan node *************-->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+        <!-- <remap from="cloud_in" to="/icp_node/registered_cloud"/>  -->
+        <remap from="cloud_in" to="/ground_segmentation/segmentation/obstacle"/> 
+
+        <rosparam>
+            # target_frame: rslidar # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: -0.05
+            max_height: 0.22
+ 
+            angle_min: -3.1415926 # -M_PI
+            angle_max: 3.1415926 # M_PI
+            angle_increment: 0.003 # 0.17degree
+            scan_time: 0.1
+            range_min: 0.2
+            range_max: 100
+            use_inf: true
+            inf_epsilon: 1.0
+ 
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+    </node>
+
+    <!-- ***************************filter laserscan******************** -->
+    <include file="$(find laser_filters)/launch/anglarBounds.launch" />
+
+    <!-- **************************tf transform************************ -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom"
+    args="0.0 0.0 0.0 0 0.0 0.0 /map /odom 100" /> -->
+
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
+    args="0.0 0.0 0.5 0 0.0 0.0 /base_footprint /livox_frame 100" />
+
+    <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_base_footprint"
+    args="0.0 0.0 0.0 0 0.0 0.0 /odom /base_footprint 100" /> -->
+
+    <!-- *******************************map server********************** -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find rm_bringup)/map/$(arg map)">
+        <param name="frame_id" value="map" />
+    </node>
+
+    <!-- *****************************localization********************** -->
+    <!--  icp  -->
+    <!-- <include file="$(find scan2map)/launch/icp_localization.launch" /> -->
+    <!-- <include file="$(find rm_navigation)/pc_launch/amcl.launch" />  -->
+    <include file="$(find icp_localization)/launch/icp_node.launch" >
+        <arg name="pcd_filename" value="$(arg pcd_filename)" />
+        <arg name="pcd_filepath" value="$(arg pcd_filepath)" />
+    </include>
+    
+    <!-- ***************************move base ************************-->
+    <param name="/use_sim_time" value="true"/>
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/teb_local_planner_params.yaml" command="load" />
+        
+        <param name="base_global_planner" value="global_planner/GlobalPlanner" />
+
+        <param name="planner_frequency" value="1.0" />
+        <param name="planner_patience" value="5.0" />
+        <param name="use_dijkstra" value="false" />
+
+        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="controller_frequency" value="5.0" />
+		<param name="controller_patience" value="15.0" />
+
+        <param name="clearing_rotation_allowed" value="false" />
+    </node>
+
+    <!-- ***************************velocity_smoother_ema ************************-->
+    <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" />
+
+    </group>
+
+</launch>

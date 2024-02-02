@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="PCD_directory" default="$(find rm_bringup)/PCD/" />
+    <!-- <arg name="PCD_name" default="RMUC" /> -->
+    <arg name="PCD_name" default="scans1" />
+
+    <node pkg="pcd2pgm" name="pcd2topic" type="pcd2topic" output="screen" >
+        <param name="file_directory" value="$(arg PCD_directory)" />
+        <param name="file_name" value="$(arg PCD_name)" />
+    </node>
+
+    <arg name="file_name" value="RMUC3" />
+
+    <arg name="file_path" value="$(find rm_bringup)/map/$(arg file_name)" />
+    <node pkg="map_server" name="map_save" type="map_saver" args="-f $(arg file_path)" output="screen" />
+        
+
+</launch>
