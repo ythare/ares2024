@@ -51,7 +51,7 @@
         </collision>
         <mu1>0.5</mu1>
         <mu2>0.5</mu2>
-        <xacro:default_inertial mass="50"/>  
+        <xacro:default_inertial mass="0.2"/>  
     </link>
 
     <link name="wheel_2">
@@ -69,7 +69,7 @@
         </collision>
         <mu1>0.5</mu1>
         <mu2>0.5</mu2>
-        <xacro:default_inertial mass="50"/>  
+        <xacro:default_inertial mass="0.2"/>  
     </link>
 
     <link name="wheel_3">
@@ -87,7 +87,7 @@
         </collision>
         <mu1>0.5</mu1>
         <mu2>0.5</mu2>
-        <xacro:default_inertial mass="50"/>    
+        <xacro:default_inertial mass="0.2"/>    
     </link>
 
     <link name="wheel_4">
@@ -105,7 +105,7 @@
         </collision>
         <mu1>0.5</mu1>
         <mu2>0.5</mu2>
-        <xacro:default_inertial mass="50"/>    
+        <xacro:default_inertial mass="0.2"/>    
     </link>
 
     <joint name="base_to_wheel1" type="continuous">
