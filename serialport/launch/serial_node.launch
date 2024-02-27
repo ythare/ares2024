@@ -1,5 +1,6 @@
 <launch>
 
     <node pkg="serialport" type="serial_node" name="serial_node" output="screen"/>
+    <node pkg="rm_decision" type="move_base_nav" name="move_base_nav" output="screen"/>
 
 </launch>

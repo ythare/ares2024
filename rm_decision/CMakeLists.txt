@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(serialport)
+project(rm_decision)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,19 +8,14 @@ project(serialport)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  serial
-  std_msgs
-  sensor_msgs
-  tf2_geometry_msgs
   geometry_msgs
   nav_msgs
-  message_generation
+  roscpp
+  rospy
+  sensor_msgs
+  std_msgs
   tf
-  move_base_msgs
-  actionlib
-  actionlib_msgs
+  rm_robotmsg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,9 +54,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 # add_message_files(
 #   FILES
-#   Chassis_Control.msg
-#   RobotDate.msg
-#   Movebase_state.msg
+#   Message1.msg
+#   Message2.msg
 # )
 
 ## Generate services in the 'srv' folder
@@ -74,15 +68,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
-#   move_base.action
+#   Action1.action
+#   Action2.action
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  actionlib_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   geometry_msgs#   nav_msgs#   sensor_msgs#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -115,9 +109,9 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
- LIBRARIES serialport
- CATKIN_DEPENDS roscpp rospy serial std_msgs geometry_msgs nav_msgs sensor_msgs tf tf2_geometry_msgs message_runtime actionlib_msgs actionlib
- DEPENDS system_lib
+#  LIBRARIES rm_decision
+#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf
+#  DEPENDS system_lib
 )
 
 ###########
@@ -127,39 +121,17 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+include
   ${catkin_INCLUDE_DIRS}
 )
-# include_directories(${PROJECT_SOURCE_DIR}/include/serialport)
 
-add_executable(serial_node 
-          src/serial_start.cpp 
-          src/crc_check.cpp 
-          src/serialport.cpp)
-target_link_libraries(serial_node ${catkin_LIBRARIES})
-
-# add_executable(send_cmd_vel 
-#           src/robot/robot_start.cpp 
-#           src/robot/send_cmd_vel.cpp 
-#           src/serialport/crc_check.cpp 
-#           src/serialport/serialport.cpp)
-# target_link_libraries(send_cmd_vel ${catkin_LIBRARIES})
-
-# add_executable(move_base_node 
-#           src/robot/move_base_node.cpp 
-#           src/serialport/crc_check.cpp 
-#           src/serialport/serialport.cpp)
-# target_link_libraries(move_base_node ${catkin_LIBRARIES})
-
-# add_executable(showpath
-#           src/robot/trace_maker.cpp
-# )
-# target_link_libraries(showpath ${catkin_LIBRARIES})
-
+add_executable(move_base_nav 
+          src/move_base_nav.cpp )
+target_link_libraries(move_base_nav ${catkin_LIBRARIES})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/serialport.cpp
+#   src/${PROJECT_NAME}/rm_decision.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -170,7 +142,7 @@ target_link_libraries(serial_node ${catkin_LIBRARIES})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/serialport_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/rm_decision_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -234,7 +206,7 @@ target_link_libraries(serial_node ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_serialport.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rm_decision.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

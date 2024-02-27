@@ -8,7 +8,7 @@
 
 
     <!-- send_cmd_vel 与下位机通信-->
-    <node pkg="serialport" type="send_cmd_vel" name="send_cmd_vel" output="screen" />
+    <!-- <node pkg="serialport" type="send_cmd_vel" name="send_cmd_vel" output="screen" /> -->
     
 
     <!-- 设置地图的配置文件 -->
@@ -31,7 +31,7 @@
     <!-- <include file="$(find rm_navigation)/pc_launch/move_base03.launch" /> -->
 
     <!-- 启动move_base_node -->
-    <node pkg="serialport" type="move_base_node" name="move_base_node" output="screen" />
+    <!-- <node pkg="serialport" type="move_base_node" name="move_base_node" output="screen" /> -->
 
     <!-- 启动robot_urdf -->
     <include file="$(find rm_navigation)/pc_launch/robot_urdf.launch" />

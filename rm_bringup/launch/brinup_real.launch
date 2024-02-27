@@ -5,7 +5,6 @@
 
     <arg name="rviz_open" default="$(arg mode)" />
     <arg name="pcd_save_enable_" default="$(arg mode)" />
-    
     <!-- <arg name="map" default="rmuc_map_draw.yaml" /> -->
     <arg name="map" default="RMUC3.yaml" />
     <!-- icp_localization -->
@@ -13,9 +12,9 @@
 	<arg name="pcd_filepath" default="$(find rm_bringup)/PCD/$(arg pcd_filename)" /> 
 
         <!-- ***************************simulation env******************** -->
-    <include file="$(find ares_simulation)/launch/simu_ares.launch" >
+    <!-- <include file="$(find ares_simulation)/launch/simu_ares.launch" >
         <arg name="key_control" value="$(arg mode)" />
-    </include>
+    </include> -->
 
         <!-- ***************************fast_lio for Odometry******************** -->
     <include file="$(find fast_lio)/launch/mapping_avia.launch" >
@@ -28,7 +27,7 @@
          <!-- ***************************Ground segmentation ***************************-->
     <node name="ground_segmentation" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node" output="screen">
         <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
-        <param name="input_topic" value="/livox/lidar/pointcloud" />
+        <param name="input_topic" value="/livox/lidar" />
         <param name="ground_output_topic" value="segmentation/ground" />
         <param name="obstacle_output_topic" value="segmentation/obstacle" />
     </node>
@@ -90,15 +89,13 @@
     </include>
     
     <!-- ***************************move base ************************-->
-    <param name="/use_sim_time" value="true"/>
+    <!-- <param name="/use_sim_time" value="true"/> -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
         <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="local_costmap" />
         <rosparam file="$(find rm_navigation)/config/move_base_sim/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find rm_navigation)/config/move_base_sim/global_costmap_params.yaml" command="load" />
-        <!-- <rosparam file="$(find rm_navigation)/config/move_base_sim/teb_local_planner_params.yaml" command="load" /> -->
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/dwa_local_planner_params.yaml" command="load" />
-        
+        <rosparam file="$(find rm_navigation)/config/move_base_sim/teb_local_planner_params.yaml" command="load" />
         
         <param name="base_global_planner" value="global_planner/GlobalPlanner" />
 
@@ -106,9 +103,7 @@
         <param name="planner_patience" value="5.0" />
         <param name="use_dijkstra" value="false" />
 
-        <!-- <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> -->
-        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
-
+        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
 		<param name="controller_frequency" value="10.0" />
 		<param name="controller_patience" value="15.0" />
 
