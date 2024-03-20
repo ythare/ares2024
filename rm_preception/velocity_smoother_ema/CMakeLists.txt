@@ -3,7 +3,7 @@ project(velocity_smoother_ema)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
-
+include_directories("usr/include/eigin3")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES velocity_smoother_ema
+ LIBRARIES velocity_smoother
 #  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
@@ -203,3 +203,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(velocity_smoother src/velocity_Filter.cpp)
+target_link_libraries(velocity_smoother ${catkin_LIBRARIES} ${PCL_LIBRARIES}   )

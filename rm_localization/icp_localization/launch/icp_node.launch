@@ -21,7 +21,7 @@
 
 
 	<!-- Launch icp node -->
-	<node name="icp_node" pkg="icp_localization" type="localizer_node"
+	<node name="icp_node" pkg="icp_localization" type="localizer_node" respawn="true"
 		output="screen" launch-prefix="$(arg launch_prefix)">
 		<param name="pcd_filename" value="$(arg pcd_filepath)" />
 		<rosparam command="load" file="$(arg parameter_filepath)" />

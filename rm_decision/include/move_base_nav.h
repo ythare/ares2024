@@ -21,10 +21,12 @@
 #include "tf/transform_datatypes.h"
 #include <nav_msgs/Odometry.h>
 #include "../../config.h"
-#include "/home/ythare/ws_livox/devel/include/rm_robotmsg/RobotState.h"
-#include "/home/ythare/ws_livox/devel/include/rm_robotmsg/RobotControl.h"
-#include "/home/ythare/ws_livox/devel/include/rm_robotmsg/Stmdate.h"
+#include "rm_robotmsg/RobotState.h"
+#include "rm_robotmsg/RobotControl.h"
+#include "rm_robotmsg/Stmdate.h"
 #include "../../serialport/include/serialport.hpp"
+
+
 
 class rm_nav
 {
@@ -38,12 +40,22 @@ private:
 
 
     ros::Publisher goal_publisher_;
+    ros::Publisher RobotState_publisher_;
 
 
-    geometry_msgs::PoseStamped goal;
+    // geometry_msgs::PoseStamped goal;
+    move_base_msgs::MoveBaseGoal goal;
 
     rm_robotmsg::RobotState robotdate_msg;
     rm_robotmsg::RobotControl robotcontrol_msg;
+
+    
+
+    // std::string action_name_;// 行动名称
+    
+
+    // typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac;
 
     bool goal_received = false;
 
@@ -62,13 +74,16 @@ private:
     } move_base_state;
 
     uint8_t MoveBase_Status = 10;
-    int8_t nav_goal = -1;
-    int8_t nav_goal_last = -1;
+    int8_t nav_goal = 0;
+    int8_t nav_goal_last = 0;
+    int8_t Tar_Turn_angle = 0;
     bool goal_pub_flag = true;
+    bool reset_arriveINFO_flag = false;
 
 
 
 public:
+    // MoveBaseClient ac;
     rm_nav();
     ~rm_nav();
 
@@ -77,6 +92,9 @@ public:
     void State_Callback(const actionlib_msgs::GoalStatusArray::ConstPtr &status_msg);
     void GetLocation_callback(const rm_robotmsg::Stmdate &msg);
     void decision();
+
+   
+    // MoveBaseClient ac = MoveBaseClient("move_base", true);
 };
 
 #endif

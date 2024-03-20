@@ -47,8 +47,8 @@ namespace serialport
         uint8_t data_len1;
 
         uint8_t date1;
+        uint8_t date2;
         uint8_t goal;
-        uint8_t date3;
         uint8_t date4;
         uint8_t date5;
         uint8_t date6;

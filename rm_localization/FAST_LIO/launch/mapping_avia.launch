@@ -4,7 +4,8 @@
 	<arg name="rviz" default="true" />
 	<arg name="pcd_save_enable" default="false" />
 
-	<rosparam command="load" file="$(find fast_lio)/config/avia.yaml" />
+	<!-- <rosparam command="load" file="$(find fast_lio)/config/avia.yaml" /> -->
+	<rosparam command="load" file="$(find rm_bringup)/config/fast_lio_avia.yaml" />
 	<param name="feature_extract_enable" type="bool" value="0"/>
 	<param name="point_filter_num" type="int" value="3"/>
 	<param name="max_iteration" type="int" value="3" />

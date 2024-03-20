@@ -1,5 +1,0 @@
-<launch>
-    <arg name="map" default="rmuc_map_draw.yaml" />
-    <arg name="filename" value="$(find rm_navigation)/map/${arg map}" />
-    <node name="map_save" pkg="map_server" type="map_saver" args="-f $(arg filename)" />
-</launch>

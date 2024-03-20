@@ -73,7 +73,7 @@ namespace serialport
     {
         unsigned char _date_temp[sizeof(Receive_Date)];
         int n = sp.read(_date_temp, _data_len_receive);
-        // ROS_DEBUG("date0:%d , date1:%d, date2:%d, crc1:%d, crc2:%d , _data_len_receive:%d, sp.read_len:%d ",
+        // printf("date0:%d , date1:%d, date2:%d, crc1:%d, crc2:%d , _data_len_receive:%d, sp.read_len:%d \n ",
         // _date_temp[0], _date_temp[1], _date_temp[2], _date_temp[_data_len_receive-2], _date_temp[_data_len_receive-1], _data_len_receive, n);
         if (n == _data_len_receive)
         {
@@ -83,10 +83,10 @@ namespace serialport
                 memcpy( (unsigned char *)_receive_date, _date_temp, _data_len_receive);
                 return true;
             }
-            else  ROS_ERROR("crc is false");
+            // else  ROS_ERROR("crc is false");
             //有时候会卡在这里
         }
-        else ROS_ERROR("date lenth  is false");
+        // else ROS_ERROR("date lenth  is false");
         
         return false;
     }

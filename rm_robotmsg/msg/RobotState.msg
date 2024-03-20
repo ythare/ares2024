@@ -5,6 +5,5 @@ float32 w_now
 float32 vx
 float32 vy
 float32 vw
-float32 goal_x
-float32 goal_y
-float32 goal_w
+float32 arrive_flag
+float32 arrive_flag_last

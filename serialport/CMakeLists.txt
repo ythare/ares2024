@@ -18,9 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   message_generation
   tf
-  move_base_msgs
-  actionlib
-  actionlib_msgs
+  rm_robotmsg
 )
 
 ## System dependencies are found with CMake's conventions

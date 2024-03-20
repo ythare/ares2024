@@ -30,13 +30,15 @@ std::string pcd_file;
 std::string map_topic_name;
 const std::string pcd_format = ".pcd";
 nav_msgs::OccupancyGrid map_topic_msg;
-
+//  直通滤波 
 double thre_z_min = -0.01;
-double thre_z_max = 2.5;
+double thre_z_max = 1.0;
 int flag_pass_through = 0;
-
+// 半径滤波
 double radious = 0.05;
 double thre_count = 50;
+// 向量法
+bool vector_open = false;
 
 double grid_x = 0.1;
 double grid_y = 0.1;
@@ -65,6 +67,13 @@ int main(int argc, char** argv)
    ros::NodeHandle nh;
    ros::NodeHandle private_nh("~");
    ros::Rate loop_rate(1.0);
+   private_nh.param<double>("thre_z_min", thre_z_min, -0.01);
+   private_nh.param<double>("thre_z_max", thre_z_max, 0.1);
+   private_nh.param<double>("radious", radious, 0.05);
+   private_nh.param<double>("thre_count", thre_count, 50);
+   private_nh.param<bool>("vector_open", vector_open, false);
+
+
    private_nh.param("file_directory", file_directory, std::string("/home/ares_yt/ws_livox/src/Lidar_SLAM/Point-LIO/PCD/"));
    ROS_INFO("*** file_directory = %s ***\n", file_directory.c_str());
    private_nh.param("file_name", file_name, std::string("scans"));
@@ -91,56 +100,60 @@ int main(int argc, char** argv)
     box_filter.setInputCloud(cloud_after_Radius);//输入源
     // box_filter.setInputCloud(cloud_after_PassThrough);//输入源
     box_filter.filter(*cloud_after_PassThrough);
+    if (vector_open)
+    {
+      pcl::PointXYZ minPt, maxPt;
+      pcl::getMinMax3D(*cloud_after_PassThrough, minPt, maxPt);
 
-  //   pcl::PointXYZ minPt, maxPt;
-  //   pcl::getMinMax3D(*cloud_after_PassThrough, minPt, maxPt);
+      float leafsize = 0.05;
+      float lx = maxPt.x - minPt.x;
+      float ly = maxPt.y - minPt.y;
+      float lz = maxPt.z - minPt.z;
+      int nx = lx / leafsize + 1;
+      int ny = ly / leafsize + 1;
+      int nz = lz / leafsize + 1;
+      std::cout << "vector size" << nx * ny * nz << std::endl;
+      std::vector<pcl::PointCloud<pcl::PointXYZ>> v(nx * ny * nz);
 
-  //   float leafsize = 0.05;
-  //   float lx = maxPt.x - minPt.x;
-	//   float ly = maxPt.y - minPt.y;
-	//   float lz = maxPt.z - minPt.z;
-	//   int nx = lx / leafsize + 1;
-	//   int ny = ly / leafsize + 1;
-	//   int nz = lz / leafsize + 1;
-  //   std::cout<< "vector size"<<nx * ny * nz<<std::endl;
-  //   std::vector<pcl::PointCloud<pcl::PointXYZ>> v(nx * ny * nz);
+      for (auto &p : *cloud_after_PassThrough)
+      {
+        int ix = (p.x - minPt.x) / leafsize;
+        int iy = (p.y - minPt.y) / leafsize;
+        int iz = (p.z - minPt.z) / leafsize;
+        v[ix + iy * nx + iz * nx * ny].push_back(p);
+      }
+      // for (int i = 0; i < v.size(); ++i)
+      for (auto &p : v)
+      {
+        int point_size = p.size();
+        if (point_size > 3)
+        {
+          Eigen::Vector4f centroid;
+          pcl::compute3DCentroid(p, centroid);
+          Eigen::MatrixXf points_near(3, point_size);
+          for (int j = 0; j < point_size; j++)
+          {
+            points_near(0, j) = p.points[j].x;
+            points_near(1, j) = p.points[j].y;
+            points_near(2, j) = p.points[j].z;
+          }
+          Eigen::Vector3f favec = ((points_near * (points_near.transpose())).inverse() * points_near).rowwise().sum();
 
-  //   for(auto &p: *cloud_after_PassThrough)
-  //   {
-  //       int ix = (p.x - minPt.x) / leafsize;
-	// 	int iy = (p.y - minPt.y) / leafsize;
-	// 	int iz = (p.z - minPt.z) / leafsize;
-  //       v[ix + iy * nx + iz * nx * ny].push_back(p);
-  //   }
-  //       // for (int i = 0; i < v.size(); ++i)
-  //   for(auto &p : v)
-	// {
-  //       int point_size = p.size();
-	// 	if (point_size > 3)
-	// 	{
-	// 		Eigen::Vector4f centroid;
-	// 		pcl::compute3DCentroid(p, centroid);
-	// 		Eigen::MatrixXf points_near(3, point_size);
-  //           for(int j = 0 ; j < point_size; j ++)
-  //           {
-  //               points_near(0,j) = p.points[j].x;
-  //               points_near(1,j) = p.points[j].y;
-  //               points_near(2,j) = p.points[j].z;
-  //           }
-  //           Eigen::Vector3f favec = ((points_near*(points_near.transpose())).inverse() * points_near).rowwise().sum();
-            
-  //           double shoot = favec.dot(Eigen::Vector3f(0,0,1)) / favec.norm();
-  //           if(abs(shoot) < 0.7)
-  //           {
-  //               pcl_out->points.push_back(pcl::PointXYZ(centroid.x(), centroid.y(), centroid.z()));
-  //           }
-	// 	}
-	// }
-  //  SetMapTopicMsg(pcl_out, map_topic_msg);
-   SetMapTopicMsg(cloud_after_Radius, map_topic_msg);
+          double shoot = favec.dot(Eigen::Vector3f(0, 0, 1)) / favec.norm();
+          if (abs(shoot) < 0.7)
+          {
+            pcl_out->points.push_back(pcl::PointXYZ(centroid.x(), centroid.y(), centroid.z()));
+          }
+        }
+      }
+      SetMapTopicMsg(pcl_out, map_topic_msg);
+    }
+    else
+      SetMapTopicMsg(cloud_after_Radius, map_topic_msg);
 
-   pcl::visualization::PCLVisualizer viewer("cloud_viwer");
-   pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> handle(cloud_after_Radius,"z");
+
+    pcl::visualization::PCLVisualizer viewer("cloud_viwer");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> handle(cloud_after_Radius, "z");
    
    
 

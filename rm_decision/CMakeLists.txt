@@ -129,6 +129,10 @@ add_executable(move_base_nav
           src/move_base_nav.cpp )
 target_link_libraries(move_base_nav ${catkin_LIBRARIES})
 
+add_executable(repub_odom 
+          src/repub_odom.cpp )
+target_link_libraries(repub_odom ${catkin_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/rm_decision.cpp

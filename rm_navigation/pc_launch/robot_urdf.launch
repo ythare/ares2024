@@ -1,9 +1,0 @@
-<launch>
-    <arg name="model" />
-    <arg name="gui" default="true" />
-    <param name="robot_description" textfile="$(find rm_navigation)/urdf/urdf/robot.urdf" />
-    <!-- <param name="robot_description" textfile="$(find rm_navigation)/urdf/urdf/my_car.urdf" /> -->
-    <param name="use_gui" value="$(arg gui)"/>
-    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"  /> 
-</launch>
