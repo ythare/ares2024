@@ -1,4 +1,4 @@
-image: /home/ythare/ws_livox/src/rm_bringup/map/RMUC3.pgm
+image: RMUC3.pgm
 resolution: 0.050000
 origin: [-6.878313, -9.293737, 0.000000]
 negate: 0

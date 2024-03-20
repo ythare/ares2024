@@ -1,4 +1,4 @@
-image: /home/ythare/ws_livox/src/rm_bringup/map/RMUC2.pgm
+image: /home/ares_yt/ares/src/rm_bringup/map/RMUC2.pgm
 resolution: 0.050000
 origin: [-7.846122, -9.781475, 0.000000]
 negate: 0

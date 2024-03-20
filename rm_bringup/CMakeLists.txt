@@ -4,6 +4,8 @@ project(rm_bringup)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+set(PCL_INCLUDE_DIRS /usr/include/pcl-1.10 )  
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -15,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  livox_ros_driver2  # 新增
+  pcl_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -156,6 +160,12 @@ include_directories(
 add_executable(point_cloud_converter_node src/converter.cpp)
 
 target_link_libraries(point_cloud_converter_node
+  ${catkin_LIBRARIES}
+)
+
+# add_executable(livox2pointcloud2_node src/livox2pointcloud2.cpp)
+add_executable(repub_livox src/livox_repub.cpp)
+target_link_libraries(repub_livox
   ${catkin_LIBRARIES}
 )
 #############

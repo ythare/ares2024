@@ -5,37 +5,58 @@
 
     <arg name="rviz_open" default="$(arg mode)" />
     <arg name="pcd_save_enable_" default="$(arg mode)" />
-    <!-- <arg name="map" default="rmuc_map_draw.yaml" /> -->
-    <arg name="map" default="RMUC3.yaml" />
-    <!-- icp_localization -->
-    <arg name="pcd_filename" default="RMUC3.pcd" /> 
+
+    <!-- <arg name="map" default="RMUC3.yaml" /> -->
+    <!-- <arg name="pcd_filename" default="RMUC3.pcd" />  -->
+
+    <!-- <arg name="map" default="house.yaml" />
+    <arg name="pcd_filename" default="house.pcd" />  -->
+
+    <arg name="map" default="base.yaml" />
+    <arg name="pcd_filename" default="base.pcd" /> 
+
 	<arg name="pcd_filepath" default="$(find rm_bringup)/PCD/$(arg pcd_filename)" /> 
-
-        <!-- ***************************simulation env******************** -->
-    <!-- <include file="$(find ares_simulation)/launch/simu_ares.launch" >
-        <arg name="key_control" value="$(arg mode)" />
-    </include> -->
-
         <!-- ***************************fast_lio for Odometry******************** -->
     <include file="$(find fast_lio)/launch/mapping_avia.launch" >
         <arg name="rviz" value="$(arg rviz_open)" />
         <arg name="pcd_save_enable" value="$(arg pcd_save_enable_)" />
     </include>
 
+    <!-- <include file="$(find point_lio)/launch/mapping_avia.launch" >
+        <arg name="rviz" value="$(arg rviz_open)" />
+        <arg name="pcd_save_enable" value="$(arg pcd_save_enable_)" />
+    </include> -->
+<!-- *************************** repub livox ******************** -->
+    <node pkg="rm_bringup" type="repub_livox" name="repub_livox" output="screen" >
+        <param name="livox_raw_message_name"    type="string"   value="/livox/lidar" />
+        <param name="livox_points_message_name"    type="string"   value="/livox/lidar/pointcloud2" />
+        <param name="thre_low" type="double" value="0.5" />
+        <param name="thre_high" type="double" value="0.5" />
+    </node>
+
+    <!-- ***************************filter laserscan******************** -->
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+      <!-- <remap from="scan" to="/livox/lidar/pointcloud2" /> -->
+      <rosparam command="load" file="$(find rm_bringup)/config/box_filter.yaml" />
+    </node>
+<!-- ***************************导航模式******************** -->
     <group unless="$(arg mode)">  
+
 
          <!-- ***************************Ground segmentation ***************************-->
     <node name="ground_segmentation" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node" output="screen">
-        <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
-        <param name="input_topic" value="/livox/lidar" />
+        
+        <rosparam command="load" file="$(find rm_bringup)/config/segmentation_params.yaml"/>
+        <param name="input_topic" value="/livox/lidar/pointcloud2" />
         <param name="ground_output_topic" value="segmentation/ground" />
         <param name="obstacle_output_topic" value="segmentation/obstacle" />
     </node>
+         <!-- ***************************repub odom ***************************-->
+    <!-- <node pkg="rm_decision" name="repub_odom" type="repub_odom" output="screen" /> -->
 
 
         <!-- ****************run pointcloud_to_laserscan node *************-->
     <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
-        <!-- <remap from="cloud_in" to="/icp_node/registered_cloud"/>  -->
         <remap from="cloud_in" to="/ground_segmentation/segmentation/obstacle"/> 
 
         <rosparam>
@@ -61,15 +82,14 @@
         </rosparam>
     </node>
 
-    <!-- ***************************filter laserscan******************** -->
-    <include file="$(find laser_filters)/launch/anglarBounds.launch" />
+
 
     <!-- **************************tf transform************************ -->
     <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom"
     args="0.0 0.0 0.0 0 0.0 0.0 /map /odom 100" /> -->
 
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
-    args="0.0 0.0 0.5 0 0.0 0.0 /base_footprint /livox_frame 100" />
+    args="0.0 0.0 0.0 0 0.0 0.0 /base_footprint /livox_frame 100" />
 
     <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_base_footprint"
     args="0.0 0.0 0.0 0 0.0 0.0 /odom /base_footprint 100" /> -->
@@ -81,38 +101,52 @@
 
     <!-- *****************************localization********************** -->
     <!--  icp  -->
-    <!-- <include file="$(find scan2map)/launch/icp_localization.launch" /> -->
-    <!-- <include file="$(find rm_navigation)/pc_launch/amcl.launch" />  -->
+
+    <arg name="icp_config_name" value="icp_config.yaml" />
+    <arg name="input_filters_config_name" value="icp_input_filters_mid360.yaml" />
+
     <include file="$(find icp_localization)/launch/icp_node.launch" >
         <arg name="pcd_filename" value="$(arg pcd_filename)" />
         <arg name="pcd_filepath" value="$(arg pcd_filepath)" />
+
+	    <arg name="icp_config_path" value="$(find rm_bringup)/config/$(arg icp_config_name)" />
+	    <arg name="input_filters_config_path" value="$(find rm_bringup)/config/$(arg input_filters_config_name)" />
+
+        <arg name="parameter_filepath" value="$(find rm_bringup)/config/icp_param.yaml"/>
     </include>
     
     <!-- ***************************move base ************************-->
-    <!-- <param name="/use_sim_time" value="true"/> -->
+    <arg name="odom_topic" default="/Odometry_ptz" />
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/global_costmap_params.yaml" command="load" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/teb_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find rm_bringup)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find rm_bringup)/config/move_base/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/teb_local_planner_params.yaml" command="load" />
         
         <param name="base_global_planner" value="global_planner/GlobalPlanner" />
 
-        <param name="planner_frequency" value="5.0" />
+        <param name="planner_frequency" value="10.0" />
         <param name="planner_patience" value="5.0" />
         <param name="use_dijkstra" value="false" />
 
         <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-		<param name="controller_frequency" value="10.0" />
-		<param name="controller_patience" value="15.0" />
+		<param name="controller_frequency" value="15.0" />
+		<param name="controller_patience" value="20.0" />
 
         <param name="clearing_rotation_allowed" value="false" />
+
+
     </node>
 
-    <!-- ***************************velocity_smoother_ema ************************-->
-    <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" />
+    <arg name="rviz" default="true"/>
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen" args="-d $(find ares_simulation)/rviz/ares.rviz" />
 
+    <!-- 启动robot_urdf -->
+    <include file="$(find ares_simulation)/launch/real_ares.launch" />
+    <!-- ***************************velocity_smoother_ema ************************-->
+    <!-- <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" /> -->
+    <node name="velocity_smoother" type="velocity_smoother" pkg="velocity_smoother_ema" output="screen" />
     <!-- <node pkg="serialport" type="serial_node" name="serial_node" output="screen"/>
     <node pkg="rm_decision" type="move_base_nav" name="move_base_nav" output="screen"/> -->
 

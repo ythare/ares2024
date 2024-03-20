@@ -28,10 +28,13 @@
          <!-- ***************************Ground segmentation ***************************-->
     <node name="ground_segmentation" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node" output="screen">
         <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
-        <param name="input_topic" value="/livox/lidar/pointcloud" />
+        <param name="input_topic" value="/cloud_registered_body" />
         <param name="ground_output_topic" value="segmentation/ground" />
         <param name="obstacle_output_topic" value="segmentation/obstacle" />
     </node>
+
+         <!-- ***************************repub odom ***************************-->
+    <!-- <node pkg="rm_decision" name="repub_odom" type="repub_odom" output="screen" /> -->
 
 
         <!-- ****************run pointcloud_to_laserscan node *************-->
@@ -84,30 +87,38 @@
     <!--  icp  -->
     <!-- <include file="$(find scan2map)/launch/icp_localization.launch" /> -->
     <!-- <include file="$(find rm_navigation)/pc_launch/amcl.launch" />  -->
+    
+    <arg name="icp_config_name" value="icp_config.yaml" />
+    <arg name="input_filters_config_name" value="icp_input_filters_mid360.yaml" />
+
     <include file="$(find icp_localization)/launch/icp_node.launch" >
         <arg name="pcd_filename" value="$(arg pcd_filename)" />
         <arg name="pcd_filepath" value="$(arg pcd_filepath)" />
+
+	    <arg name="icp_config_path" value="$(find rm_bringup)/config/$(arg icp_config_name)" />
+	    <arg name="input_filters_config_path" value="$(find rm_bringup)/config/$(arg input_filters_config_name)" />
+
+        <arg name="parameter_filepath" value="$(find rm_bringup)/config/icp_param.yaml"/>
     </include>
     
     <!-- ***************************move base ************************-->
     <param name="/use_sim_time" value="true"/>
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/global_costmap_params.yaml" command="load" />
-        <!-- <rosparam file="$(find rm_navigation)/config/move_base_sim/teb_local_planner_params.yaml" command="load" /> -->
-        <rosparam file="$(find rm_navigation)/config/move_base_sim/dwa_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find rm_bringup)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find rm_bringup)/config/move_base/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rm_bringup)/config/move_base/teb_local_planner_params.yaml" command="load" />
+        <!-- <rosparam file="$(find rm_navigation)/config/move_base_sim/dwa_local_planner_params.yaml" command="load" /> -->
         
         
         <param name="base_global_planner" value="global_planner/GlobalPlanner" />
-
         <param name="planner_frequency" value="5.0" />
         <param name="planner_patience" value="5.0" />
         <param name="use_dijkstra" value="false" />
 
-        <!-- <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> -->
-        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+        <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
 
 		<param name="controller_frequency" value="10.0" />
 		<param name="controller_patience" value="15.0" />
@@ -116,8 +127,8 @@
     </node>
 
     <!-- ***************************velocity_smoother_ema ************************-->
-    <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" />
-
+    <!-- <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" /> -->
+    <node name="velocity_smoother" type="velocity_smoother" pkg="velocity_smoother_ema" output="screen" />
     <!-- <node pkg="serialport" type="serial_node" name="serial_node" output="screen"/>
     <node pkg="rm_decision" type="move_base_nav" name="move_base_nav" output="screen"/> -->
 

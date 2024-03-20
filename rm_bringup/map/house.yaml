@@ -1,0 +1,7 @@
+image: /home/ares_yt/ares/src/rm_bringup/map/house.pgm
+resolution: 0.050000
+origin: [-7.026309, -8.762571, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+
