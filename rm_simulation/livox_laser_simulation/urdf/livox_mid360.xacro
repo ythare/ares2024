@@ -64,8 +64,8 @@
 
   <xacro:macro name="mid360" params="visualize:=True name:='livox' parent:='base_link' *origin">
     
-    <joint name="lidar_joint" type="fixed">
-        <axis xyz="0 1 0" />
+    <joint name="lidar_joint" type="continuous">
+        <axis xyz="0 0 1" />
         <xacro:insert_block name="origin"/>
         <parent link="${parent}"/>
         <child link="${name}_base"/>

@@ -1,5 +1,3 @@
-#---standard pioneer footprint---
-#---(in meters)---
 #机器人几何参，如果机器人是圆形，设置 robot_radius,如果是其他形状设置 footprint
 robot_radius: 0.2
 # footprint: [[-0.12, -0.12], [-0.12, 0.12], [0.12, 0.12], [0.12, -0.12]] #其他形状
@@ -7,27 +5,39 @@ robot_radius: 0.2
 transform_tolerance: 0.2
 map_type: costmap
 
-obstacle_layer:
+obstacle_range: 5.0  # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
+raytrace_range: 5.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
+track_unknown_space: true
+max_obstacle_height: 1.0
+min_obstacle_height: 0.0
+
+obstacle_2Dlayer:
  enabled: true
- obstacle_range: 3.0  # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
- raytrace_range: 3.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
-#膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物
+ obstacle_range: 5.0  # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
+ raytrace_range: 5.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
+ #膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物
  inflation_radius: 0.5  
  track_unknown_space: true
  combination_method: 1
 
-#  observation_sources: laser_scan_sensor
-#  laser_scan_sensor: {data_type: LaserScan, topic: scan_filtered, marking: true, clearing: true,
-#                       inf_is_valid: true,
-#                       sensor_frame: base_footprint,
-#                       observation_keep_time: 0.0, 
-#                       expected_update_rate: 0 }
  observation_sources: laser_scan_sensor
  laser_scan_sensor: {data_type: LaserScan, topic: scan_filtered, marking: true, clearing: true}
 
- observation_sources: pointcloud2_sensor
- pointcloud2_sensor: {data_type: PointCloud2, topic: /ground_segmentation/segmentation/obstacle, marking: true, clearing: true}
+obstacle_3Dlayer:
+ enabled: true
+ obstacle_range: 5.0  # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
+ raytrace_range: 5.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
+ #膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物
+ inflation_radius: 0.5  
+ track_unknown_space: true
+ combination_method: 1
 
+ observation_sources: pointcloud2_sensor
+ pointcloud2_sensor: {data_type: PointCloud2, topic: /ground_segmentation/segmentation/obstacle, 
+                      marking: true, 
+                      clearing: true, 
+                      inf_is_valid: true, 
+                      observation_keep_time: 0.0}
 
 inflation_layer:
   enabled:              true
@@ -36,4 +46,13 @@ inflation_layer:
 
 static_layer:
   enabled:              true
-  # map_topic:            "map"
+
+observation_sources: pointcloud2_sensor
+pointcloud2_sensor: {data_type: PointCloud2, topic: /ground_segmentation/segmentation/obstacle, 
+                      marking: true, 
+                      clearing: true, 
+                      inf_is_valid: true, 
+                      observation_keep_time: 0.0}
+
+# observation_sources: laser_scan_sensor
+# laser_scan_sensor: {data_type: LaserScan, topic: scan_filtered, marking: true, clearing: true}
