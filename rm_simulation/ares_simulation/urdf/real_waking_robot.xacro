@@ -149,10 +149,11 @@
         </visual>
     </link>
 
-    <joint name="livox_joint" type="fixed">
+    <joint name="livox_joint" type="continuous"> <!-- 修改为可绕z轴旋转的link  -->
         <origin xyz="0 0.0 0.17" rpy="0 0 0"/>
         <parent link="base_footprint"/>
         <child link="livox_frame"/>
+        <axis xyz="0 0 1" />  <!-- 参考z轴  -->
     </joint>
 
 </robot>
