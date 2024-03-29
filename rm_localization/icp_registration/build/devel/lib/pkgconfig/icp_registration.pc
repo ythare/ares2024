@@ -1,0 +1,8 @@
+prefix=/home/ythare/ws_livox/src/rm_localization/icp_registration/build/devel
+
+Name: icp_registration
+Description: Description of icp_registration
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -130,10 +130,10 @@ include_directories(
 #   src/${PROJECT_NAME}/icp_registration.cpp
 # )
 
-# add_executable(icp_localizer_node
-#           src/icp_localization.cpp )
+add_executable(icp_localizer_node
+          src/icp_localization.cpp )
 
-# target_link_libraries(icp_localizer_node ${catkin_LIBRARIES})
+target_link_libraries(icp_localizer_node ${catkin_LIBRARIES})
 
 
 ## Add cmake target dependencies of the library
