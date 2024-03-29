@@ -24,7 +24,7 @@ namespace icp
         {
             ROS_ERROR("Couldn't read file");
         }
-        std::cout << "pcl初始点云数据点数：" << cloud->points.size() << std::endl;
+        std::cout << "pcl初始点云数据点数:" << cloud->points.size() << std::endl;
         voxel_refine_filter_.setInputCloud(cloud);
         voxel_refine_filter_.filter(*cloud);
 

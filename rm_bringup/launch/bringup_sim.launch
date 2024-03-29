@@ -8,6 +8,7 @@
     
     <!-- <arg name="map" default="rmuc_map_draw.yaml" /> -->
     <arg name="map" default="RMUC3.yaml" />
+    <!-- <arg name="map" default="map_draw.yaml" /> -->
     <!-- <arg name="map" default="blankmap.yaml" /> -->
     <!-- icp_localization -->
     <arg name="pcd_filename" default="RMUC3.pcd" /> 
@@ -23,6 +24,20 @@
         <arg name="rviz" value="$(arg rviz_open)" />
         <arg name="pcd_save_enable" value="$(arg pcd_save_enable_)" />
     </include>
+
+    <!-- *************************** repub livox ******************** -->
+    <node pkg="rm_bringup" type="repub_livox" name="repub_livox" output="screen" >
+        <param name="livox_raw_message_name"    type="string"   value="/livox/lidar" />
+        <param name="livox_points_message_name"    type="string"   value="/livox/lidar/pointcloud2" />
+        <param name="thre_low" type="double" value="0.5" />
+        <param name="thre_high" type="double" value="0.5" />
+    </node>
+
+    <!-- ***************************filter laserscan******************** -->
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+      <!-- <remap from="scan" to="/livox/lidar/pointcloud2" /> -->
+      <rosparam command="load" file="$(find rm_bringup)/config/box_filter.yaml" />
+    </node>
 
     <group unless="$(arg mode)">  
 
@@ -66,18 +81,14 @@
         </rosparam>
     </node>
 
-    <!-- ***************************filter laserscan******************** -->
-    <include file="$(find laser_filters)/launch/anglarBounds.launch" />
+
 
     <!-- **************************tf transform************************ -->
     <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom"
     args="0.0 0.0 0.0 0 0.0 0.0 /map /odom 100" /> -->
 
-    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
-    args="0.0 0.0 0.5 0 0.0 0.0 /base_footprint /livox_frame 100" />
-
-    <!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_base_footprint"
-    args="0.0 0.0 0.0 0 0.0 0.0 /odom /base_footprint 100" /> -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_livox_frame"
+    args="0.0 0.0 0.5 0 0.0 0.0 /base_footprint /livox_frame 100" /> -->
 
     <!-- *******************************map server********************** -->
     <node name="map_server" pkg="map_server" type="map_server" args="$(find rm_bringup)/map/$(arg map)">
@@ -85,11 +96,15 @@
     </node>
 
     <!-- *****************************localization********************** -->
-    <!--  icp  -->
+              <!-- *************************icp 2D**************************-->
     <!-- <include file="$(find scan2map)/launch/icp_localization.launch" /> -->
+              <!-- ************************* amcl **************************-->
     <!-- <include file="$(find rm_navigation)/pc_launch/amcl.launch" />  -->
-    
-    <arg name="icp_config_name" value="icp_config.yaml" />
+              <!-- *************************icp 3D**************************-->
+    <rosparam file="$(find icp_registration)/config/icp.yaml" command="load"/>
+    <node pkg="icp_registration" name="icp_localizer_node" type="icp_localizer_node" output="screen" />
+              <!-- **************************official icp*************************-->
+    <!-- <arg name="icp_config_name" value="icp_config.yaml" />
     <arg name="input_filters_config_name" value="icp_input_filters_mid360.yaml" />
 
     <include file="$(find icp_localization)/launch/icp_node.launch" >
@@ -100,7 +115,7 @@
 	    <arg name="input_filters_config_path" value="$(find rm_bringup)/config/$(arg input_filters_config_name)" />
 
         <arg name="parameter_filepath" value="$(find rm_bringup)/config/icp_param.yaml"/>
-    </include>
+    </include> -->
     
     <!-- ***************************move base ************************-->
     <param name="/use_sim_time" value="true"/>
